@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { callApi, toList } from "../lib/api";
+import api from "../services/api";
 
 export default function SkillEnhancer() {
   const [targetRole, setTargetRole] = useState("");
@@ -9,15 +9,20 @@ export default function SkillEnhancer() {
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const toList = (str) =>
+  str.split(",").map((s) => s.trim()).filter(Boolean);
+
   const handleGenerate = async () => {
     setLoading(true);
     setOutput("");
+  
     try {
-      const data = await callApi("/enhance-skills", {
+      const response = await api.post("/enhance-skills", {
         skills: toList(skills),
         target_role: targetRole,
       });
-      setOutput(data.enhanced_skills);
+    
+      setOutput(response.data.enhanced_skills);
     } catch (err) {
       setOutput("Something went wrong. Please check your backend is running.");
       console.error(err);

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Mail } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { callApi, toList } from "../lib/api";
+import api from "../services/api";
 
 export default function CoverLetter() {
   const [form, setForm] = useState({
@@ -18,11 +18,15 @@ export default function CoverLetter() {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+  const toList = (str) =>
+  str.split(",").map((s) => s.trim()).filter(Boolean);
+
   const handleGenerate = async () => {
     setLoading(true);
     setOutput("");
+  
     try {
-      const data = await callApi("/generate-cover-letter", {
+      const response = await api.post("/generate-cover-letter", {
         name: form.name,
         target_role: form.target_role,
         education: form.education,
@@ -31,7 +35,8 @@ export default function CoverLetter() {
         projects: toList(form.projects),
         achievements: toList(form.achievements),
       });
-      setOutput(data.cover_letter);
+    
+      setOutput(response.data.cover_letter);
     } catch (err) {
       setOutput("Something went wrong. Please check your backend is running.");
       console.error(err);

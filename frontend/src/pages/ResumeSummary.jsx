@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { callApi, toList } from "../lib/api";
+import api from "../services/api";
 
 export default function ResumeSummary() {
   const [form, setForm] = useState({
@@ -18,27 +18,32 @@ export default function ResumeSummary() {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
+  const toList = (str) =>
+  str.split(",").map((s) => s.trim()).filter(Boolean);
+
   const handleGenerate = async () => {
-    setLoading(true);
-    setOutput("");
-    try {
-      const data = await callApi("/generate-summary", {
-        name: form.name,
-        target_role: form.target_role,
-        education: form.education,
-        experience: form.experience,
-        skills: toList(form.skills),
-        projects: toList(form.projects),
-        achievements: toList(form.achievements),
-      });
-      setOutput(data.summary);
-    } catch (err) {
-      setOutput("Something went wrong. Please check your backend is running.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  setOutput("");
+
+  try {
+    const response = await api.post("/generate-summary", {
+      name: form.name,
+      target_role: form.target_role,
+      education: form.education,
+      experience: form.experience,
+      skills: toList(form.skills),
+      projects: toList(form.projects),
+      achievements: toList(form.achievements),
+    });
+
+    setOutput(response.data.summary);
+  } catch (err) {
+    setOutput("Something went wrong. Please check your backend is running.");
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fields = [
     { name: "name", placeholder: "Full Name" },

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FolderKanban } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { callApi } from "../lib/api";
+import api from "../services/api";
 
 export default function ProjectImprover() {
   const [targetRole, setTargetRole] = useState("");
@@ -10,21 +10,23 @@ export default function ProjectImprover() {
   const [loading, setLoading] = useState(false);
 
   const handleGenerate = async () => {
-    setLoading(true);
-    setOutput("");
-    try {
-      const data = await callApi("/improve-project", {
-        project,
-        target_role: targetRole,
-      });
-      setOutput(data.improved_project);
-    } catch (err) {
-      setOutput("Something went wrong. Please check your backend is running.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  setOutput("");
+
+  try {
+    const response = await api.post("/improve-project", {
+      project,
+      target_role: targetRole,
+    });
+
+    setOutput(response.data.improved_project);
+  } catch (err) {
+    setOutput("Something went wrong. Please check your backend is running.");
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="relative overflow-hidden">
